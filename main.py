@@ -1,24 +1,43 @@
 import pygame
 
 FPS = 30
+VELOCITY = 10
 
 
-class Creature(pygame.sprite.Sprite):
+class Car(pygame.sprite.Sprite):
     def __init__(self, group):
         super().__init__(group)
-        self.image = pygame.image.load('data/creature.png').convert()
+        self.const_image = pygame.image.load('data/car.png')
+        self.image = self.const_image
         self.rect = self.image.get_rect()
+        self.side = 'right'
+
+    def update(self):
+        if self.side == 'right':
+            if self.rect.right < 600:
+                self.rect.move_ip(VELOCITY, 0)
+            else:
+                self.side = 'left'
+                # flip_x, flip_y
+                # обновляем фотографию
+                self.image = pygame.transform.flip(self.const_image, True, False)
+        else:
+            if self.rect.left > 0:
+                self.rect.move_ip(-VELOCITY, 0)
+            else:
+                self.side = 'right'
+                self.image = self.const_image
 
 
 if __name__ == '__main__':
     pygame.init()
-    size = width, height = 300, 300
+    size = width, height = 600, 95
     screen = pygame.display.set_mode(size)
-    pygame.display.set_caption('Герой двигается!')
+    pygame.display.set_caption('Машинка')
     group = pygame.sprite.Group()
-    creature = Creature(group)
-    x, y = 0, 0
-    screen.fill((255, 255, 255))
+    car = Car(group)
+    car.rect.x = 0
+    car.rect.y = 0
     clock = pygame.time.Clock()
     running = True
     while running:
@@ -27,15 +46,7 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 running = False
                 pygame.quit()
-        keys_pressed = pygame.key.get_pressed()
-        if keys_pressed[pygame.K_UP]:
-            creature.rect.y -= 10
-        elif keys_pressed[pygame.K_DOWN]:
-            creature.rect.y += 10
-        elif keys_pressed[pygame.K_LEFT]:
-            creature.rect.x -= 10
-        elif keys_pressed[pygame.K_RIGHT]:
-            creature.rect.x += 10
+        group.update()
         screen.fill((255, 255, 255))
-        screen.blit(creature.image, creature.rect)
+        group.draw(screen)
         pygame.display.flip()
